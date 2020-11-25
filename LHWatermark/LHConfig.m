@@ -10,15 +10,15 @@
 
 @implementation LHConfig
 - (instancetype)initWithAlpha:(NSUInteger)alpha seed:(unsigned)seed font:(UIFont *)font{
-    self = [super init];
-    if (self) {
-        _alpha = alpha;
-        _seed = seed;
-        _font = font;
-    }
-    return self;
+	self = [super init];
+	if (self) {
+		_alpha = alpha;
+		_seed = seed;
+		_font = font;
+	}
+	return self;
 }
 + (instancetype)defaultConfig{
-    return [[LHConfig alloc] initWithAlpha:3 seed:1024 font:[UIFont systemFontOfSize:40]];
+	return [[LHConfig alloc] initWithAlpha:3 seed:1024 font:[UIFont systemFontOfSize:40]];
 }
 @end
