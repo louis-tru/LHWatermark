@@ -10,14 +10,15 @@
 #import <UIKit/UIKit.h>
 #import <Accelerate/Accelerate.h>
 
-typedef NS_ENUM(NSUInteger,PixielType){
-    PixielR,
-    PixielG,
-    PixielB,
+typedef NS_ENUM(NSUInteger,PixielType) {
+	PixielR,
+	PixielG,
+	PixielB,
 };
-typedef NS_ENUM(NSUInteger,FFTType){
-    FFTForwardType,
-    FFTBackwardType,
+
+typedef NS_ENUM(NSUInteger,FFTType) {
+	FFTForwardType,
+	FFTBackwardType,
 };
 
 @class LHConfig;
@@ -35,29 +36,28 @@ typedef NS_ENUM(NSUInteger,FFTType){
 /**扩展后图像的高度*/
 @property (nonatomic, assign)NSInteger height;
 
-
-
 @property (nonatomic, strong) LHConfig *config;
 
-
 /**
-  把文字转成Image, 把文字Image和频域图片进行叠加，再进行二维FFT逆变换，返回嵌入文字水印后的图片
-
+	把文字转成Image, 把文字Image和频域图片进行叠加，再进行二维FFT逆变换，返回嵌入文字水印后的图片
  */
-- (void)addMarkText:(NSString *)markText result:(void(^)(UIImage *watermarkImage))result;
+- (void)addMarkText:(NSString*)markText
+						 result:(void(^)(UIImage *watermarkImage))result;
 
 /**
  把水印和频域图片进行叠加，再进行二维FFT变换，返回嵌入文字水印后的图片
- 
  */
-- (void)addMarkImage:(UIImage *)markImage result:(void(^)(UIImage *watermarkImage))result;
+- (void)addMarkImage:(UIImage*)markImage
+							result:(void(^)(UIImage *watermarkImage))result;
 
 /**
  对图片进行二维FFT逆变换
  */
--(UIImage *)ifft;
+- (UIImage*)ifft;
 
-- (instancetype)initWithImage:(UIImage *)image config:(LHConfig *)config;
+- (instancetype)initWithImage:(UIImage*)image
+											 config:(LHConfig*)config;
+
 /**
  生成单通道图片
  根据PixielType来确定返回哪个通道的数据，如果direction 是正向，
@@ -66,27 +66,29 @@ typedef NS_ENUM(NSUInteger,FFTType){
  @param direction 正反变换
  @return 单通道频谱图
  */
-- (UIImage *)generateImageWithPixielType:(PixielType )pixielType direction:(FFTType)direction;
-
-
-
+- (UIImage*)generateImageWithPixielType:(PixielType)pixielType
+															direction:(FFTType)direction;
 
 /**
  生成 fft变换归一化后的三通道频谱图
  */
-- (UIImage *)generateFFTImage;
-
-
+- (UIImage*)generateFFTImage;
 
 /**
-  提取水印
-
+	提取水印
  @param originImage 原始图片
  @param watermarkImage 加了水印的图片
  @param config 配置
  @param result 生成含有水印文字的图片
  */
-+ (void)restoreImageWithOriginImage:(UIImage *)originImage watermarkImage:(UIImage *)watermarkImage config:(LHConfig *)config result:(void(^)(UIImage *markImage))result;
++ (void)restoreImageWithOriginImage:(UIImage*)originImage
+										 watermarkImage:(UIImage*)watermarkImage
+														 config:(LHConfig*)config
+														 result:(void(^)(UIImage *markImage))result;
+
++ (void) restoreImageWithWatermarkImage:(UIImage*) watermarkImage
+																 config:(LHConfig*) config
+																 result:(void(^)(UIImage *markImage)) result;
 
 /**
  生成乱序的水印矩阵
@@ -96,12 +98,16 @@ typedef NS_ENUM(NSUInteger,FFTType){
  @param height 生成目标水印高度
  @return 二维乱序水印矩阵
  */
-- (DOUBLE_COMPLEX_SPLIT )randomMatrixWithImage:(UIImage *)image  seed:(unsigned)seed width:(NSInteger)width height:(NSInteger)height;
-
+- (DOUBLE_COMPLEX_SPLIT)randomMatrixWithImage:(UIImage *)image
+																				 seed:(unsigned)seed
+																				width:(NSInteger)width
+																			 height:(NSInteger)height;
 
 /**
  根据矩阵数据生成图像，矩阵数据满足0～255
  */
-- (UIImage *)generateImageWithMatrix:(DOUBLE_COMPLEX_SPLIT )matrix width:(NSInteger)width height:(NSInteger)height;
+- (UIImage *)generateImageWithMatrix:(DOUBLE_COMPLEX_SPLIT)matrix
+															 width:(NSInteger)width
+															height:(NSInteger)height;
 
 @end

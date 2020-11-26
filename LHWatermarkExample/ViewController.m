@@ -12,64 +12,74 @@
 #import "NextViewController.h"
 #import "LHConfig.h"
 #define ImageName @"yourName"
+//#define ImageName @"lena"
 
 @interface ViewController ()
-@property (weak, nonatomic) IBOutlet UIImageView *topImgView;
-@property (weak, nonatomic) IBOutlet UIImageView *bottomImgView;
+@property (weak, nonatomic) IBOutlet UIImageView* topImgView;
+@property (weak, nonatomic) IBOutlet UIImageView* bottomImgView;
 @property (nonatomic, copy) NSString *imagePath;
+@property (nonatomic) LHConfig *cfg;
 @end
 
 @implementation ViewController
 
-- (void)viewDidLoad {
+- (void) viewDidLoad {
 	[super viewDidLoad];
 	
-	[self.topImgView addGestureRecognizer: [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(presenting:)]];
-	[self.bottomImgView addGestureRecognizer: [[UITapGestureRecognizer alloc] initWithTarget:self action:@selector(presenting:)]];
-	UIImage *image = [UIImage imageNamed:ImageName];
+	self.cfg = [[LHConfig alloc] initWithAlpha: 3
+																				seed: 1024
+																				font: [UIFont systemFontOfSize:100]];
 	
+	[self.topImgView addGestureRecognizer: [[UITapGestureRecognizer alloc]
+																					initWithTarget:self
+																					action:@selector(presenting:)]];
+	[self.bottomImgView addGestureRecognizer: [[UITapGestureRecognizer alloc]
+																						 initWithTarget:self
+																						 action:@selector(presenting:)]];
+
+	UIImage* image = [UIImage imageNamed:ImageName];
+	UIImage* qr = [UIImage imageNamed:@"qr"];
+
+	LHWatermarkProcessor* processor = [[LHWatermarkProcessor alloc] initWithImage:image
+																																				 config:_cfg];
+	// [processor addMarkText:@"楚学文"
+	[processor addMarkImage:qr
+									 result:^(UIImage *watermarkImage) {
+		_topImgView.image = watermarkImage;
 	
-	LHWatermarkProcessor *  processor = [[LHWatermarkProcessor alloc] initWithImage:image config:[LHConfig defaultConfig]];
-	
-	__weak typeof(self) weakSelf = self;
-	[processor addMarkText:@"你的名字"  result:^(UIImage *watermarkImage) {
-		__strong typeof(weakSelf) strongSelf = weakSelf;
-		 strongSelf.topImgView.image = watermarkImage;
-		NSString *documentPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
-		_imagePath = [documentPath stringByAppendingPathComponent:[NSString stringWithFormat:@"code_%@.png",ImageName]];
-		[UIImagePNGRepresentation(watermarkImage) writeToFile:_imagePath  atomically:YES];
-		NSLog(@"%@",_imagePath);
+		NSString *save = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) lastObject];
+
+		_imagePath = [NSString stringWithFormat:@"%@/code_%@", save, ImageName];
+		
+		[UIImagePNGRepresentation(watermarkImage) writeToFile:_imagePath atomically:YES];
+		[UIImagePNGRepresentation(watermarkImage) writeToFile:@"/Users/louis/Downloads/test.png" atomically:YES];
+
+		NSLog(@"%@", _imagePath);
 	}];
-
-
 }
 
-
-- (IBAction)restore:(id)sender {
-	 UIImage *image = [UIImage imageNamed:ImageName];
-	 __weak typeof(self) weakSelf = self;
+- (IBAction) restore:(id) sender {
+	
+	UIImage* image = [UIImage imageNamed:ImageName];
+	UIImage* watermarkImage = [UIImage imageNamed:@"test"];
+//	UIImage* watermarkImage = [UIImage imageWithContentsOfFile:_imagePath];
+	
 	// 传入元图像和加了水印的图像 异步线程
-	[LHWatermarkProcessor restoreImageWithOriginImage:image watermarkImage:[UIImage imageWithContentsOfFile:_imagePath] config:[LHConfig defaultConfig] result:^(UIImage *markImage) {
-		 __strong typeof(weakSelf) strongSelf = weakSelf;
+	[LHWatermarkProcessor restoreImageWithOriginImage:watermarkImage
+																		 watermarkImage:image
+																						 config:_cfg
+																						 result:^(UIImage *markImage) {
 		// block中返回水印的图片 主线程
-		 strongSelf.bottomImgView.image = markImage;
+		 self.bottomImgView.image = markImage;
 	}];
-   
 }
 
-- (void)presenting:(UITapGestureRecognizer *)tap{
+- (void) presenting:(UITapGestureRecognizer*) tap {
 	UIImageView *imgView = (UIImageView *)tap.view;
-	NextViewController *nVC = [[NextViewController alloc] init];
+	NextViewController *nVC = [NextViewController new];
 	nVC.image = imgView.image;
 	nVC.imgColor = imgView.backgroundColor;
 	[self presentViewController:nVC animated:YES completion:nil];
-}
-- (void)didReceiveMemoryWarning {
-	[super didReceiveMemoryWarning];
-	// Dispose of any resources that can be recreated.
-}
-- (BOOL)prefersStatusBarHidden{
-	return YES;
 }
 
 @end
